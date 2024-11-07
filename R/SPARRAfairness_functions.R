@@ -138,36 +138,39 @@ ab=function(...) abline(0,1,col=phs_colours("phs-magenta"),...)
 ##'   
 ##' where
 ##'
-##' G=group (usually sensitive attribute);  Yhat=outcome; X=set of variables 
-##'  through which G can act on Yhat, U=set of background variables;
+##'  - G=group (usually sensitive attribute);  
+##'  - Yhat=outcome; 
+##'  - X=set of variables through which G can act on Yhat, 
+##'  - U=set of background variables;
 ##'
-##' We want the counterfactual Yhat_{g' <- G} |X=x,G=g (or alternatively 
-##'  Yhat_{g' <- G} |G=g).
+##' We want the counterfactual \eqn{Yhat_{g' <- G} |X=x,G=g} (or alternatively 
+##'  \eqn{(Yhat_{g' <- G} |G=g)}), using the term \eqn{Yhat} as it appears in
+##'  the function, rather than \eqn{\hat{Y}}.
 ##' 
 ##' This can be interpreted as:
 ##'  `the distribution of values of Yhat amongst indivdiduals whose values of U 
-##'   are distributed as though they were in group G=g (and, optionally, had 
-##'   values X=x, but whose value of G is g'`
+##'   are distributed as though they were in group \eqn{G=g} (and, optionally, had 
+##'   values \eqn{X=x}, but whose value of \eqn{G} is \eqn{g'}`
 ##' 
 ##' Essentially, comparison of the counterfactual quantity above to the 
-##'  conditional Yhat|G=g isolates the difference in Yhat due to the effect of 
+##'  conditional \eqn{(Yhat|G=g)} isolates the difference in Yhat due to the effect of 
 ##'  G on Yhat through X, removing any effect due to different distributions of 
 ##'  U due to different values of G.
 ##' 
-##' To estimate Y'=Yhat_{g' <- G} | G=g, we need to
-##'  1. Compute U'~(U|G=g)
-##'  2. Compute the distribution X' as X'~(X|U~U',G=g')
-##'  3. Sample Y'~(Yhat|X~X',U~U')
+##' To estimate \eqn{Y'=Yhat_{g' \to G} | G=g}, we need to
+##'  1. Compute \eqn{U'\sim (U|G=g)}
+##'  2. Compute the distribution \eqn{X'} as \eqn{X'\sim (X|U~U',G=g')}
+##'  3. Sample \eqn{Y'~(Yhat|X\sim X',U \sim U')}
 ##' 
-##' To estimate Y'=Yhat_{g' <- G} |X=x, G=g, we need to
-##'  1. Compute U'~(U|G=g,X=x)
-##'  2. Compute the distribution X' as X'~(X|U~U',G=g')
-##'  3. Sample Y'~(Yhat|X~X',U~U')
+##' To estimate \eqn{Y'=Yhat_{g' \to G} |X=x, G=g}, we need to
+##'  1. Compute \eqn{U'\sim (U|G=g,X=x)}
+##'  2. Compute the distribution \eqn{X'} as \eqn{X'\sim (X|U \sim U',G=g')}
+##'  3. Sample \eqn{Y' \sim (Yhat|X \sim X',U \sim U')}
 ##'  
 ##' This function approximates this samplying procedure as follows
-##'  1. Look at individuals with G=g (and optionally X=x)
-##'  2. Find the values of U for these individuals
-##'  3. Find a second set of individuals with the same values of U but for whom G=g'
+##'  1. Look at individuals with \eqn{G=g} (and optionally \eqn{X=x})
+##'  2. Find the values of \eqn{U} for these individuals
+##'  3. Find a second set of individuals with the same values of \eqn{U} but for whom \eqn{G=g'}
 ##'  4. Return the indices of these individuals
 ##'  
 ##' The values of Yhat for these individuals constitute a sample from the 
@@ -182,7 +185,7 @@ ab=function(...) abline(0,1,col=phs_colours("phs-magenta"),...)
 ##' @param excl variable names to exclude from U
 ##' @param n number of samples; if NULL return all
 ##' @export 
-##' @return indices representing sample(s) from counterfactual  Yhat_{g' <- G} |X=x,G=g
+##' @return indices representing sample(s) from counterfactual  Yhat(g' <- G) |X=x,G=g
 ##' @examples
 ##' 
 ##' set.seed(23173)
@@ -202,7 +205,7 @@ ab=function(...) abline(0,1,col=phs_colours("phs-magenta"),...)
 ##' #  struct_G=function(u,n) rbinom(n,1,prob=1/2) # G|U=u ~ Bern(1/2)
 ##' #
 ##' # so the posterior of U|G=g does not depend on g. Note that, with this definition, the 
-##' #  counterfactual Yhat_{G<01}|G=1 coincides with the conditional Yhat|G=0, since
+##' #  counterfactual Yhat{G<-1}|G=1 coincides with the conditional Yhat|G=0, since
 ##' #  the counterfactual G<-1 is equivalent to just conditioning on G=1.
 ##' #
 ##' # By contrast, if we change struct_G back to its original definition, but 
@@ -211,7 +214,7 @@ ab=function(...) abline(0,1,col=phs_colours("phs-magenta"),...)
 ##' #  struct_Yhat=function(u,x,n) (runif(n,0,1) + runif(n,0,u))/2 # Yhat|X,N ~ (U(0,1) + U(0,U))/2
 ##' #
 ##' # so Yhat depends on G only through the change in posterior of U from changing g, 
-##' #  the counterfactual Yhat_{G<01}|G=1 coincides with the conditional Yhat|G=1.
+##' #  the counterfactual Yhat{G<01}|G=1 coincides with the conditional Yhat|G=1.
 ##' 
 ##' 
 ##' # Sample from complete causal model
@@ -222,27 +225,27 @@ ab=function(...) abline(0,1,col=phs_colours("phs-magenta"),...)
 ##' dat=data.frame(U,G,X,Yhat)
 ##' 
 ##' 
-##' # True counterfactual Yhat_{G <- 0}|G=1
+##' # True counterfactual Yhat{G <- 0}|G=1
 ##' w1=which(dat$G==1)
 ##' n1=length(w1)
 ##' UG1=dat$U[w1] # This is U|G=1
 ##' XG1=struct_X(UG1,rep(0,n1),n1)
 ##' YhatG1=struct_Yhat(UG1,XG1,n1)
 ##' 
-##' # Estimated counterfactual Yhat_{G <- 0}|G=1
+##' # Estimated counterfactual Yhat{G <- 0}|G=1
 ##' ind_G1=counterfactual_yhat(dat,X="X",G="G",g = 1, gdash = 0)
 ##' YhatG1_resample=dat$Yhat[ind_G1]
 ##' 
 ##' 
 ##' 
-##' # True counterfactual Yhat_{G <- 0}|G=1,X=1
+##' # True counterfactual Yhat{G <- 0}|G=1,X=1
 ##' w11=which(dat$G==1 & dat$X==1)
 ##' n11=length(w11)
 ##' UG1X1=dat$U[w11] # This is U|G=1,X=1
 ##' XG1X1=struct_X(UG1X1,rep(0,n11),n11)
 ##' YhatG1X1=struct_Yhat(UG1X1,XG1X1,n11)
 ##' 
-##' # Estimated counterfactual Yhat_{G <- 0}|G=1
+##' # Estimated counterfactual Yhat{G <- 0}|G=1
 ##' ind_G1X1=counterfactual_yhat(dat,X="X",G="G",g = 1, gdash = 0,x=1)
 ##' YhatG1X1_resample=dat$Yhat[ind_G1X1]
 ##' 
@@ -259,10 +262,10 @@ ab=function(...) abline(0,1,col=phs_colours("phs-magenta"),...)
 ##' lines(x,ecdf(dat$Yhat[which(dat$G==1)])(x),col="red") # Yhat|G=1
 ##' lines(x,ecdf(dat$Yhat[which(dat$G==0)])(x),col="blue") # Yhat|G=0
 ##' 
-##' # True counterfactual Yhat_{G <- 0}|G=1
+##' # True counterfactual Yhat{G <- 0}|G=1
 ##' lines(x,ecdf(YhatG1)(x),col="blue",lty=2) 
 ##' 
-##' # Estimated counterfactual Yhat_{G <- 0}|G=1
+##' # Estimated counterfactual Yhat{G <- 0}|G=1
 ##' lines(x,ecdf(YhatG1_resample)(x),col="blue",lty=3) 
 ##' 
 ##' legend("bottomright",
@@ -283,10 +286,10 @@ ab=function(...) abline(0,1,col=phs_colours("phs-magenta"),...)
 ##' lines(x,ecdf(dat$Yhat[which(dat$G==1 & dat$X==1)])(x),col="red") # Yhat|G=1,X=1
 ##' lines(x,ecdf(dat$Yhat[which(dat$G==0 & dat$X==1)])(x),col="blue") # Yhat|G=0,X=1
 ##' 
-##' # True counterfactual Yhat_{G <- 0}|G=1,X=1
+##' # True counterfactual Yhat{G <- 0}|G=1,X=1
 ##' lines(x,ecdf(YhatG1X1)(x),col="blue",lty=2) 
 ##' 
-##' # Estimated counterfactual Yhat_{G <- 0}|G=1,X=1
+##' # Estimated counterfactual Yhat{G <- 0}|G=1,X=1
 ##' lines(x,ecdf(YhatG1X1_resample)(x),col="blue",lty=3) 
 ##' 
 ##' legend("bottomright",
@@ -1074,92 +1077,130 @@ plot.sparraPRC=function(x,addauc=FALSE,cols=rep(phs_colours("phs-blue"),dim(x$se
 }
 
 
+##' build_diff
+##' Prepares a data frame for a ggplot object to compare differences using linear interpolation.
+##' 
+##' @param df data frame
+##' @param xvar name of variable to consider as 'x': interpolate over evenly spaced values of this variable.
+##' @return data frame using (common) interpolated x values rather than arbitrary x values
+##' @examples 
+##' # Only used internally
+build_diff = function(df, xvar) {
+  models = levels(df$Model)
+  
+  # Range of column 'xvar' of df
+  xrange = range(df[xvar])
+  
+  # Equal-spaced sequence over xvar
+  dfx = data.frame(seq(xrange[1], xrange[2], length = 500)[2:499])
+  
+  # Interpolate xvar and yvar at equal-spaced sequence for each model
+  df2=data.frame()
+  xnames=setdiff(colnames(df),c(xvar,"Model"))
+  for(m in models) {
+    d0=data.frame(Model=m,dfx[,1])
+    for (yvar in xnames) d0=cbind(d0,suppressWarnings(
+      approx(df[which(df$Model==m),xvar],df[which(df$Model==m),yvar],dfx[,1],rule = 2)$y
+    ))
+    df2=rbind(df2,d0)
+  }
+  colnames(df2)=c("Model",xvar,xnames)
+  df2$Model=factor(df2$Model,levels=models)
+  
+  return(df2)
+}
 
 
 ##' roc_2panel
 ##' Draws a ROC curve (with legend) with a second panel underneath showing sensitivity difference.
 ##' 
-##' @param rocs list of sparraROC objects (if one object, plots folds separately)
-##' @param labels labels to use in legend
+##' @param rocs list of sparraROC objects
+##' @param labels labels to use in legend; default to names of rocs.
 ##' @param col line colours
-##' @param lty line type, defaults to 1
-##' @param xy_lty line type for x-y line, defaults to 2 (dashed)
 ##' @param xy_col line colour for x-y line, defaults to red
 ##' @param highlight if non-null, add a point at this cutoff
-##' @param mar_scale scale bottom and left margins by this amount. Also scales legend.
 ##' @param yrange_lower y range for lower plot. If NULL, generates automatically
-##' @param ... other parameters passed to legend()
-##' @return No return value, draws a figure
+##' @param legend_title title for legend, defaults to nothing
+##' @return Invisibly returns plot as ggplot object
 ##' @export
 ##' @examples 
 ##' # See vignette
-roc_2panel=function(rocs,labels,col=1:length(rocs),
-                    lty=rep(1,length(col)),xy_lty=2,xy_col=phs_colours("phs-magenta"),
-                    highlight=NULL,mar_scale=1,yrange_lower=NULL,...) {
+roc_2panel=function(rocs,labels=names(rocs),col=1:length(rocs),
+                    xy_col=phs_colours("phs-magenta"),
+                    highlight=NULL,yrange_lower=NULL,legend_title="") {
   
-  if ("sens" %in% names(rocs)) {
-    nfold=length(rocs$auc)-1; np=length(rocs$sens)/nfold
-    r0=list()
-    for (i in 1:nfold) 
-      r0[[i]]=list(sens=rocs$sens[i,],
-                   spec=rocs$spec[i,])
-    rocs=r0
+  # Fix colours
+  if (length(col)>length(rocs)) col=col[1:length(rocs)]
+  
+  # Compose data frame for ggplot
+  df=data.frame()
+  for (i in 1:length(rocs)) 
+    df=rbind(df,
+             data.frame(Model=labels[i],
+                        sens=rocs[[i]]$sens[1,],
+                        spec=rocs[[i]]$spec[1,]))
+  df$Model=factor(df$Model,levels=unique(df$Model))
+  
+  # Assemble top figure
+  df1=df
+  df1$spec=1-df1$spec
+  p1 = ggplot(df1) +
+    geom_path(aes(x = .data$spec, y = .data$sens, col = .data$Model), linewidth = 0.4) +
+    xlim(0, 1) + ylim(0, 1) +
+    xlab("") + ylab("Sensitivity") +
+    theme_minimal(base_size = 8) + theme(legend.justification = c(1,0),
+                                         legend.position = c(1,0),
+                                         legend.spacing = unit(0, "npc"),
+                                         legend.margin = margin(),
+                                         legend.background = 
+                                           element_rect(fill = "white", linewidth=0, colour = "white"))
+  
+   
+   
+  
+  # Set up data frame for lower panel
+  df2=build_diff(df,"spec")
+  df2$spec=1-df2$spec
+  bx=df2$sens[which(df2$Model==labels[1])]
+  for (i in 1:length(labels)) {
+    w=which(df2$Model==labels[i])
+    df2$sens[w]= df2$sens[w]-bx
+  }
+  colnames(df2)[3]="dsens"
+  
+  p2 = ggplot(df2) + 
+    geom_path(aes(x = .data$spec, y = .data$dsens, col = .data$Model), linewidth = 0.4) +
+    xlim(0, 1) + 
+    xlab("Recall") + ylab(expression(paste(Delta," Sensitivity"))) +
+    theme_minimal(base_size = 8) + theme(legend.position = "none")
+  
+  
+  ## Modify styles
+  # Line colours
+   p1=p1 + scale_color_manual(values=col,name=legend_title)
+  p2=p2 + scale_color_manual(values=col)
+  # A-B line
+  p1=p1 + geom_abline(slope=1,color=xy_col,linetype=2)
+  # Scale for lower plot
+  if (!is.null(yrange_lower)) p2=p2 + ylim(yrange_lower[1],yrange_lower[2])
+  
+  # Highlights
+  if (!is.null(highlight)) {
+    xy=data.frame(t(data.frame(lapply(rocs,function(x) {
+      w0=which.min(abs(x$cutoffs-highlight))
+      return(c(1-x$spec[w0],x$sens[w0]))
+    }))))
+    colnames(xy)=c("x","y")
+    p1 = p1 + geom_point(aes(.data$x,.data$y),data=xy,color=col) 
+    
   }
   
-  # Set up plot parameters
-  oldpar = par(no.readonly = TRUE)
-  on.exit(par(oldpar)) 
-  par(mar=c(1,mar_scale*4,0.1,0.1))
-  layout(mat=rbind(matrix(1,4,4),matrix(2,2,4)))
+  # Combine figures
+  p = p1 / p2 + plot_layout(heights = c(3,1)) 
   
-  # Initialise
-  plot(0,xlim=c(0,1),ylim=c(0,1),xaxt="n",ylab="Sensitivity",type="n")
-  abline(0,1,col=xy_col,lty=xy_lty)
-  
-  # x-values to draw sensitivity at
-  xspec=seq(0,1,length=100)[2:99]; xr=c()
-  
-  # Draw ROC curves on top panel
-  for (i in 1:length(rocs)) {
-    xy=rocs[[i]]
-    lines(1-xy$spec,xy$sens,col=col[i],lty=lty[i])
-    xsens=suppressWarnings(approx(1-xy$spec,xy$sens,xspec)$y)
-    xr=rbind(xr,xsens)
-    if (!is.null(highlight)) {
-      w0=which.min(abs(xy$cutoffs-highlight))
-      points(1-xy$spec[w0],xy$sens[w0],pch=16,col=col[i])
-    }
-  }
-  
-  # Add legend
-  par(ps=par()$ps/mar_scale)
-  legend("bottomright",legend=labels,col=col,lty=lty,cex=mar_scale,...)
-  par(ps=par()$ps*mar_scale)
-  
-  # Bottom panel setup
-  par(mar=c(mar_scale*4,mar_scale*4,0.1,0.1))
-  if (is.null(yrange_lower)) {
-    yrr=range(t(xr)-xr[1,],na.rm=TRUE); 
-    if (!is.finite(sum(yrr))) yrr=c(-1,1)
-  } else yrr=yrange_lower
-  
-  plot(0,xlim=c(0,1),ylim=yrr,type="n",
-       xlab="1-Specificity",ylab=expression(paste(Delta,"(sens.)")),yaxt="n")
-  axis(2,at=pretty(yrr,n=2))
-  
-  # Draw lines on bottom panel
-  for (i in 1:length(rocs)) {
-    lines(xspec,xr[i,]-xr[1,],col=col[i],lty=lty[i])
-  }
-  #abline(h=0,col=xy_col,lty=xy_lty)
-  
-}  
-
-
-
-
-
-
+  suppressWarnings(print(p))
+  invisible(p)
+}
 
 
 
@@ -1171,76 +1212,87 @@ roc_2panel=function(rocs,labels,col=1:length(rocs),
 ##' prc_2panel
 ##' Draws a PRC curve (with legend) with a second panel underneath showing precision difference.
 ##' 
-##' @param prcs list of sparraPRC objects. If of length 1, splits into folds
+##' @param prcs list of sparraPRC objects.
 ##' @param labels labels to use in legend
 ##' @param col line colours
-##' @param lty line type, defaults to 1
 ##' @param highlight if non-null, draw a point at a particular cutoff
-##' @param mar_scale scale bottom and left margins by this amount. Also scales legend.
 ##' @param yrange_lower y range for lower plot. If NULL, generates automatically
-##' @param ... other parameters passed to legend()
-##' @return No return value, draws a figure
+##' @param legend_title title for legend, defaults to nothing
+##' @return Silently return ggplot object
 ##' @export
 ##' @examples 
 ##' # See vignette
-prc_2panel=function(prcs,labels,col=1:length(prcs),
-                    lty=rep(1,length(col)),highlight=NULL,mar_scale=1,yrange_lower=NULL,...) {
+prc_2panel=function(prcs,labels=names(prcs),col=1:length(prcs),
+                    highlight=NULL,yrange_lower=NULL,legend_title="") {
   
-  if ("ppv" %in% names(prcs)) {
-    nfold=length(prcs$auc)-1; np=length(prcs$sens)/nfold
-    r0=list()
-    for (i in 1:nfold) 
-      r0[[i]]=list(sens=prcs$sens[i,],
-                   ppv=prcs$ppv[i,])
-    prcs=r0
+  # Fix colours
+  if (length(col)>length(prcs)) col=col[1:length(prcs)]
+  
+  # Compose data frame for ggplot
+  df=data.frame()
+  for (i in 1:length(prcs)) 
+    df=rbind(df,
+             data.frame(Model=labels[i],
+                        sens=prcs[[i]]$sens[1,],
+                        ppv=prcs[[i]]$ppv[1,]))
+  df$Model=factor(df$Model,levels=unique(df$Model))
+  
+  # Assemble top figure
+  p1 = ggplot(df) +
+    geom_path(aes(x = .data$sens, y = .data$ppv, col = .data$Model), linewidth = 0.4) +
+    xlim(0, 1) + ylim(0, 1) +
+    xlab("") + ylab("Precision") +
+    theme_minimal(base_size = 8) + theme(legend.justification = c(1,0),
+                                         legend.position = c(1,0),
+                                         legend.spacing = unit(0, "npc"),
+                                         legend.margin = margin(),
+                                         legend.background = 
+                                           element_rect(fill = "white", linewidth=0, colour = "white"))
+  
+   
+   
+  
+  
+  # Set up data frame for lower panel
+  df2=build_diff(df,"sens")
+  bx=df2$ppv[which(df2$Model==labels[1])]
+  for (i in 1:length(labels)) {
+    w=which(df2$Model==labels[i])
+    df2$ppv[w]= df2$ppv[w]-bx
   }
+  colnames(df2)[3]="dppv"
+  
+  p2 = ggplot(df2) + 
+    geom_path(aes(x = .data$sens, y = .data$dppv, col = .data$Model), linewidth = 0.4) +
+    xlim(0, 1) + 
+    xlab("Recall") + ylab(expression(paste(Delta," Precision"))) +
+    theme_minimal(base_size = 8) + theme(legend.position = "none")
   
   
+  ## Modify styles
+  # Line colours
+   p1=p1 + scale_color_manual(values=col,name=legend_title)
+  p2=p2 + scale_color_manual(values=col)
+  # Scale for lower plot
+  if (!is.null(yrange_lower)) p2=p2 + ylim(yrange_lower[1],yrange_lower[2])
   
-  # Set up plot 
-  oldpar = par(no.readonly = TRUE)
-  on.exit(par(oldpar)) 
-  par(mar=c(1,mar_scale*4,0.1,0.1))
-  layout(mat=rbind(matrix(1,4,4),matrix(2,2,4)))
-  
-  # Initialise plot
-  plot(0,xlim=c(0,1),ylim=c(0,1),xaxt="n",ylab="Precision",type="n")
-  xr=c(); 
-  
-  # X-values at which difference in precision will be plotted
-  xsens=seq(0,1,length=100)[2:99]
-  
-  # Draw curves on top panel
-  for (i in 1:length(prcs)) {
-    px=prcs[[i]]
-    lines(px$sens,px$ppv,col=col[i],lty=lty[i])
-    xppv=suppressWarnings(approx(px$sens,px$ppv,xsens)$y)
-    xr=rbind(xr,xppv)
-    if (!is.null(highlight)) {
-      w0=which.min(abs(px$cutoffs-highlight))
-      points(px$sens[w0],px$ppv[w0],pch=16,col=col[i])
-    }
+  # Highlights
+  if (!is.null(highlight)) {
+    xy=data.frame(t(data.frame(lapply(prcs,function(x) {
+      w0=which.min(abs(x$cutoffs-highlight))
+      return(c(x$sens[w0],x$ppv[w0]))
+    }))))
+    colnames(xy)=c("x","y")
+    p1 = p1 + geom_point(aes(.data$x,.data$y),data=xy,color=col) 
     
   }
   
-  # Add legend
-  par(ps=par()$ps/mar_scale)
-  legend("topright",legend=labels,col=col,lty=lty,cex=mar_scale,...)
-  par(ps=par()$ps*mar_scale)
+  # Combine figures
+  p = p1 / p2 + plot_layout(heights = c(3,1)) 
   
-  # Initialise bottom panel
-  par(mar=c(mar_scale*4,mar_scale*4,0.1,0.1))
-  if (is.null(yrange_lower)) {
-    yrr=range(t(xr)-xr[1,],na.rm=TRUE); if (!is.finite(sum(yrr))) yrr=c(-1,1)
-  } else yrr=yrange_lower
+  suppressWarnings(print(p))
+  invisible(p)
   
-  plot(0,xlim=c(0,1),ylim=yrr,type="n",
-       xlab="Recall",ylab=expression(paste(Delta,"(Prec.)")),
-       yaxt="n")
-  axis(2,at=pretty(range(t(xr)-xr[1,]),n=2))
-  
-  # Draw lines on bottom panel
-  for (i in 1:length(prcs)) lines(xsens,xr[i,]-xr[1,],col=col[i],lty=lty[i])
 }
 
 
@@ -1251,78 +1303,108 @@ prc_2panel=function(prcs,labels,col=1:length(prcs),
 ##' @param cals list of calibration objects, output from getcal(). 
 ##' @param labels labels to use in legend
 ##' @param col line colours
-##' @param lty line type, defaults to 1
-##' @param xy_lty line type for x-y line, defaults to 2 (dashed)
 ##' @param xy_col line colour for x-y line, defaults to phs-magenta
 ##' @param ci_col colours to draw confidence intervals on lower panel; NA to not draw. 
 ##' @param highlight if non-null, highlight a particular value
-##' @param mar_scale scale bottom and left margins by this amount. Also scales legend.
 ##' @param yrange_lower y range for lower plot. If NULL, generates automatically
-##' @param ... other parameters passed to legend()
-##' @return No return value, draws a figure
+##' @param legend_title title for legend, defaults to nothing
+##' @return Silently return ggplot object
 ##' @export
 ##' @examples 
 ##' # See vignette
 cal_2panel=function(cals,labels,col=1:length(cals),
-                    lty=rep(1,length(col)),xy_lty=2,xy_col=phs_colours("phs-magenta"),
-                    ci_col=rep(NA,length(col)),highlight=NULL,mar_scale=1,yrange_lower=NULL,...) {
+                    xy_col=phs_colours("phs-magenta"),
+                    ci_col=col,highlight=NULL,yrange_lower=NULL,
+                    legend_title="") {
+  
+  # Fix colours
+  if (length(col)>length(cals)) col=col[1:length(cals)]
   
   
-  # Setup plot
-  oldpar = par(no.readonly = TRUE)
-  on.exit(par(oldpar)) 
-  par(mar=c(1,mar_scale*4,0.1,0.1))
-  layout(mat=rbind(matrix(1,4,4),matrix(2,2,4)))
+  # Compose data frame for ggplot
+  df=data.frame()
+  for (i in 1:length(cals)) 
+    df=rbind(df,
+             data.frame(Model=labels[i],
+                        obs=cals[[i]]$x,
+                        exp=cals[[i]]$y,
+                        du=cals[[i]]$upper,
+                        dl=cals[[i]]$lower))
+  df$Model=factor(df$Model,levels=unique(df$Model))
   
-  # Initialise plot
-  plot(0,xlim=c(0,1),ylim=c(0,1),xaxt="n",ylab="Observed",type="n")
+  # Assemble top figure
+  if (!is.null(ci_col)) ccol=ci_col[as.factor(df$Model)]
+  p1 = ggplot(df)
+  if (!is.null(ci_col)) p1=p1 + geom_ribbon(aes(x = .data$obs, ymin = .data$dl, 
+                                                ymax = .data$du,fill=.data$Model),alpha = 0.25)
+  p1=p1 +
+    geom_path(aes(x = .data$obs, y = .data$exp, col = .data$Model), linewidth = 0.4) +
+    xlim(0, 1) + ylim(0, 1) +
+    xlab("") + ylab("Observed") +
+    theme_minimal(base_size = 8) + theme(legend.justification = c(1,0),
+                                         legend.position = c(1,0),
+                                         legend.spacing = unit(0, "npc"),
+                                         legend.margin = margin(),
+                                         legend.background = 
+                                           element_rect(fill = "white", linewidth=0, colour = "white"))
   
-  # Draw lines on top panel
-  xr=c()
-  for (i in 1:length(cals)) {
-    cx=cals[[i]]
-    lines(cx$x,cx$y,col=col[i],lty=lty[i])
-    xr=rbind(xr,cx$y-cx$x)
-    if (!is.null(highlight)) {
-      w0=which.min(abs(cx$x-highlight))
-      points(cx$x[w0],cx$y[w0],pch=16,col=col[i])
-    }
+   
+   
+  
+  
+  # Set up data frame for lower panel
+  df2=build_diff(df,"obs")
+  for (i in 1:length(labels)) {
+    w=which(df2$Model==labels[i])
+    df2$exp[w]= df2$exp[w]-df2$obs[w]
+    df2$du[w]=df2$exp[w]-df2$obs[w] + (df2$du[w]-df2$exp[w])
+    df2$dl[w]=df2$exp[w]-df2$obs[w] + (df2$dl[w]-df2$exp[w])
   }
-  abline(0,1,col=xy_col,lty=xy_lty,lwd=1)
+  colnames(df2)[3]="dexp"
   
-  # Draw legend
-  par(ps=par()$ps/mar_scale)
-  legend("topleft",legend=labels,col=col,lty=lty,cex=mar_scale,...)
-  par(ps=par()$ps*mar_scale)
+  p2 = ggplot(df2)
+  if (!is.null(ci_col)) p2=p2 + geom_ribbon(aes(x = .data$obs, ymin = .data$dl, 
+                                                ymax = .data$du,fill=.data$Model),alpha = 0.25)
+  p2 = p2 +  geom_path(aes(x = .data$obs, y = .data$dexp,col=.data$Model), linewidth = 0.4) +
+    xlim(0, 1) + 
+    xlab("Expected") + ylab(expression(paste(Delta," Expected"))) +
+    theme_minimal(base_size = 8) + theme(legend.position = "none")
   
-  # Initialise bottom panel
-  par(mar=c(mar_scale*4,mar_scale*4,0.1,0.1))
-  xpred=seq(0,1,length=100)[2:99]
   
-  if (is.null(yrange_lower)) {
-    yrr=range(xr,na.rm=TRUE); if (!is.finite(sum(yrr))) yrr=c(-1,1)
-  } else yrr=yrange_lower
+  ## Modify styles
+  # Line colours
+  cval=c("r1"="red","r2"="black")
+   p1=p1 + scale_color_manual(values=col,name=legend_title) 
+  p2=p2 + scale_color_manual(values=col)
   
-  plot(0,xlim=c(0,1),ylim=yrr,type="n",
-       xlab="Predicted",ylab=expression(paste(Delta,"(cal.)")),
-       yaxt="n")
-  axis(2,at=pretty(range(xr),n=3))
-  
-  # Draw lines on bottom panel
-  for (i in 1:length(cals)) {
-    cx=cals[[i]]
-    if (!is.na(ci_col[i])) {
-      xx=c(cx$x,rev(cx$x))
-      yy=c(cx$lower,rev(cx$upper))-c(cx$x,rev(cx$x))
-      wn=which(is.finite(xx+yy)); xx=xx[wn]; yy=yy[wn];
-      polygon(xx,yy,
-              col=ci_col[i],border=NA)
-    }
-    lines(cx$x,cx$y-cx$x,col=col[i],lty=lty[i])
+  if (!is.null(ci_col)) {
+    p1=p1 + scale_fill_manual(values=ci_col,name=legend_title) 
+    p2=p2 + scale_fill_manual(values=ci_col)
   }
-  abline(h=0,col=xy_col,lty=xy_lty)
   
+  # A-B line
+  p1=p1 + geom_abline(slope=1,color=xy_col,linetype=2)
+  # Scale for lower plot
+  if (!is.null(yrange_lower)) p2=p2 + ylim(yrange_lower[1],yrange_lower[2])
+  
+  # Highlights
+  if (!is.null(highlight)) {
+    xy=data.frame(t(data.frame(lapply(cals,function(x) {
+      w0=which.min(abs(x$x-highlight))
+      return(c(x$x[w0],x$y[w0]))
+    }))))
+    colnames(xy)=c("x","y")
+    p1 = p1 + geom_point(aes(.data$x,.data$y),data=xy,color=col) 
+    
+  }
+  
+  # Combine figures
+  p = p1 / p2 + plot_layout(heights = c(3,1)) 
+  
+  suppressWarnings(print(p))
+  invisible(p)
 }  
+
 
 
 
@@ -1336,114 +1418,120 @@ cal_2panel=function(cals,labels,col=1:length(cals),
 ##' @param objs list of fairness objects. Each should contain sub-objects 'x', 'y' and 'ci', which specify x and y values and half-widths of confidence intervals around y.
 ##' @param labels labels to use in legend
 ##' @param col line colours
-##' @param lty line type, defaults to 1
 ##' @param yrange limit of y axis; defaults to 0,1
 ##' @param ci_col confidence envelope colours. These will be transparent.
 ##' @param highlight if non-null, draw a point at a particular cutoff
 ##' @param logscale if TRUE, draw with log-scale.
-##' @param mar_scale scale bottom and left margins by this amount. Also scales legend.
-##' @param lpos legend position
+##' @param lpos legend position; as accepted by ggplot legend.position
 ##' @param yrange_lower y range for lower plot. If NULL, generates automatically
-##' @param ... other parameters passed to legend()
-##' @return No return value, draws a figure
+##' @param legend_title title for legend, defaults to nothing
+##' @return Silently return ggplot object
 ##' @export
 ##' @examples 
 ##' # See vignette
-groupmetric_2panel=function(objs,labels,col=1:length(objs),lty=rep(1,length(col)),yrange=NULL,
-                            ci_col=1:length(objs),highlight=NULL,logscale=FALSE,
-                            mar_scale=1,lpos=NULL,yrange_lower=NULL,...) {
+groupmetric_2panel=function(objs,labels=names(objs),col=1:length(objs),yrange=NULL,
+                            ci_col=col,highlight=NULL,logscale=FALSE,
+                            lpos=c(1,0),yrange_lower=NULL,legend_title="") {
   
-  # Set up plot  
-  oldpar = par(no.readonly = TRUE)
-  on.exit(par(oldpar)) 
-  par(mar=c(1,mar_scale*4,0.1,0.1))
-  layout(mat=rbind(matrix(1,4,4),matrix(2,2,4)))
+  # Fix colours
+  if (length(col)>length(objs)) col=col[1:length(objs)]
+  
+  # Compose data frame for ggplot
+  df=data.frame()
+  for (i in 1:length(objs)) 
+    df=rbind(df,
+             data.frame(Model=labels[i],
+                        x=objs[[i]]$x,
+                        y=objs[[i]]$y,
+                        du=objs[[i]]$y + objs[[i]]$ci,
+                        dl=objs[[i]]$y - objs[[i]]$ci))
+  df$Model=factor(df$Model,levels=unique(df$Model))
+  
+  
+  
+  # Assemble top figure
+  if (!is.null(ci_col)) ccol=ci_col[as.factor(df$Model)]
+  p1 = ggplot(df)
+  if (!is.null(ci_col)) p1=p1 + geom_ribbon(aes(x = .data$x, ymin = .data$dl, 
+                                                ymax = .data$du,fill=.data$Model),alpha = 0.25)
+  p1=p1 +
+    geom_path(aes(x = .data$x, y = .data$y, col = .data$Model), linewidth = 0.4)
+  p1 = p1 + xlab("") + ylab("Probability") +
+    theme_minimal(base_size = 8) + theme(legend.justification = c(1,0),
+                                         legend.position = lpos,
+                                         legend.spacing = unit(0, "npc"),
+                                         legend.margin = margin(),
+                                         legend.background = 
+                                           element_rect(fill = "white", linewidth=0, colour = "white"))
+  if (!is.null(yrange)) p1=p1 + ylim(yrange[1],yrange[2])
+  
+   
+   
+  
+  
+  # Set up data frame for lower panel
+  df2=build_diff(df,"x")
+  w1=which(df2$Model==labels[1])
+  bx=df2$y[w1]
+  cx=df2$du[w1]-bx
+  for (i in 1:length(labels)) {
+    w=which(df2$Model==labels[i])
+    dyb=df2$y[w]
+    xci=sqrt((df2$du[w]-dyb)^2 + cx^2)
+    df2$y[w]= dyb-bx
+    df2$du[w]=dyb-bx + xci 
+    df2$dl[w]=dyb-bx - xci
+  }
+  df2$du[w1]=df2$y[w1]
+  df2$dl[w1]=df2$y[w1]
+  colnames(df2)[3]="dy"
+  
+  p2 = ggplot(df2)
+  if (!is.null(ci_col)) p2=p2 + geom_ribbon(aes(x = .data$x, ymin = .data$dl,
+                                                ymax = .data$du,fill=.data$Model),alpha = 0.25)
+  p2 = p2 +  geom_path(aes(x = .data$x, y = .data$dy,col=.data$Model), linewidth = 0.4)
+  p2=p2 +   xlab("Score") + ylab(expression(paste(Delta," Prob."))) +
+    theme_minimal(base_size = 8) + theme(legend.position = "none")
   
   if (logscale) {
-    xvals=log(objs[[1]]$x); xvals[which(!is.finite(xvals))]=NA
-    xrange=range(log(c(0.01,0.99)),na.rm=TRUE) 
-  }
-  else {
-    xvals=objs[[1]]$x
-    xrange=c(0,1)
-  }
-  
-  if (is.null(yrange)) {
-    y_all=c(); for (i in 1:length(objs)) y_all=c(y_all,objs[[i]]$y)
-    yrange=range(y_all,na.rm=TRUE)
-    if (!is.finite(sum(yrange))) yrange=c(0,1)
-  }
-  
-  if (is.null(lpos)) lpos="topright"
-  
-  plot(0,xlim=xrange,ylim=yrange,type="n",xlab="",xaxt="n",ylab="Prob.",las=1)
-  
-  # Lines on top panel
-  # X-values at which difference in precision will be plotted
-  xsens=seq(0,1,length=100)[2:99]
-  
-  # Draw curves and confidence intervals on top panel
-  yr=c()
-  for (i in 1:length(objs)) {
-    lines(xvals,objs[[i]]$y,col=col[i],lty=lty[i])
-    
-    # CI
-    yci=c(objs[[i]]$y+objs[[i]]$ci,rev(objs[[i]]$y-objs[[i]]$ci)); wxx=which(is.finite(yci))
-    cic=col2rgb(ci_col[i]); cicx=rgb(cic[1]/256,cic[2]/256,cic[3]/256,alpha=0.5)
-    polygon(c(xvals,rev(xvals))[wxx],yci[wxx],col=cicx,border=NA)
-    yr=rbind(yr,objs[[i]]$y-objs[[1]]$y)
-  }
-  
-  # Legend
-  par(ps=par()$ps/mar_scale)
-  legend(lpos,labels,col=col,lty=lty,bg="white",cex=mar_scale,...)
-  par(ps=par()$ps*mar_scale)
-  
-  # Add highlight line
-  if (!is.null(highlight)) {
-    if (logscale) abline(v=log(highlight)) else abline(v=highlight)
-  }
-  
-  
-  
-  
-  # Lower panel setup
-  par(mar=c(mar_scale*4,mar_scale*4,0.1,0.1))
-  
-  if (is.null(yrange_lower)) {
-    yrr=range(yr,na.rm=TRUE); if (!is.finite(sum(yrr))) yrr=c(-1,1)
-  } else yrr=yrange_lower
-  plot(0,xlim=xrange,ylim=yrr,type="n",
-       xlab="Cutoffs",ylab=expression(paste(Delta,"prob")),xaxt="n",las=1)
-  
-  # Draw lines and confidence intervals on lower panel
-  for (i in 1:length(objs)) {
-    lines(xvals,objs[[i]]$y-objs[[1]]$y,col=col[i],lty=lty[i])
-    
-    # CI
-    ci_dif=sqrt(objs[[i]]$ci^2 + objs[[1]]$ci^2); if (i==1) ci_dif=rep(0,length(objs[[i]]$ci))
-    yci=c(objs[[i]]$y - objs[[1]]$y + ci_dif,rev(objs[[i]]$y - objs[[1]]$y - ci_dif)); wci=which(is.finite(yci))
-    cic=col2rgb(ci_col[i]); cicx=rgb(cic[1]/256,cic[2]/256,cic[3]/256,alpha=0.5)
-    polygon(c(xvals,rev(xvals))[wci],yci[wci],col=cicx,border=NA)
-  }
-  
-  # Add highlight line
-  if (!is.null(highlight)) {
-    if (logscale) abline(v=log(highlight)) else abline(v=highlight)
-  }
-  
-  # Add x axis labels
-  pz=pretty(range(objs[[1]]$x),n=10)
-  if (logscale) {
-    axis(1,at=log(pz),labels=round(100*pz))
+    p1=suppressMessages(p1 + scale_x_continuous(trans='log',labels = label_number(accuracy = 0.111),
+                                                limits=c(0.01,0.99)) ) 
+    p2=suppressMessages(p2 + scale_x_continuous(trans='log',labels = label_number(accuracy = 0.111),
+                                                limits=c(0.01,0.99)) )
   } else {
-    axis(1,at=pz,labels=round(100*pz))
+    p1=suppressMessages(p1 + xlim(0,1))
+    p2=suppressMessages(p2 + xlim(0,1))
   }
+
+  
+  
+  ## Modify styles
+  # Line colours
+  p1=p1 + scale_color_manual(values=col,name=legend_title) 
+  p2=p2 + scale_color_manual(values=col)
+  
+  if (!is.null(ci_col)) {
+    p1=p1 + scale_fill_manual(values=ci_col,name=legend_title)
+    p2=p2 + scale_fill_manual(values=ci_col)
+  }
+  
+  # Scale for lower plot
+  if (!is.null(yrange_lower)) p2=p2 + ylim(yrange_lower[1],yrange_lower[2])
+  
+  # Highlights
+  if (!is.null(highlight)) {
+    p1 = p1 + geom_vline(xintercept=highlight,col="red",linetype="dashed")
+    p2 = p2 + geom_vline(xintercept=highlight,col="red",linetype="dashed")
+    
+  }
+  
+  # Combine figures
+  p = p1 / p2 + plot_layout(heights = c(3,1)) 
+  
+  suppressWarnings(print(p))
+  invisible(p)
+  
 }
-
-
-
-
 
 
 
@@ -1458,7 +1546,7 @@ groupmetric_2panel=function(objs,labels,col=1:length(objs),lty=rep(1,length(col)
 ##'  Columns are named with the admission types to be plotted. Any admission 
 ##'   types including the string 'Died' are counted as deaths
 ##'  If the matrix has N rows, these are interpreted as corresponding to N
-##'   score quantiles
+##'   score quantiles in increasing order.
 ##'  The (i,j)th entry of the matrix is the number of people admitted for 
 ##'   reason i with a score greater than or equal to (j-1)/N and less than (j/N) 
 ##'   who are in that group
@@ -1468,19 +1556,18 @@ groupmetric_2panel=function(objs,labels,col=1:length(objs),lty=rep(1,length(col)
 ##' @param threshold score threshold to plot (between 0 and 1)
 ##' @param labels labels for group 1 and group 2
 ##' @param inc_died set to TRUE to include a second panel showing 'death' type admissions
-##' @param mar_scale scale margins by this amount. Also scales legend.
-##' @return No return value, draws a figure
+##' @return Silently return ggplot object
 ##' @export
 ##' @examples 
 ##' 
 ##' # See vignette
 plot_decomp=function(decomp1,decomp2,threshold,labels,
-                     inc_died=TRUE,mar_scale=1) {
+                     inc_died=TRUE) {
   
   nquant=dim(decomp1)[1] # Number of score quantiles
   
   tq=floor(nquant*threshold) # Largest quantile less than score threshold
-
+  
   dat1=colSums(decomp1[1:tq,]) # Group 1 with score < threshold
   dat2=colSums(decomp2[1:tq,]) # Group 2 with score < threshold
   ref1=colSums(decomp1) # Group 1, all
@@ -1488,80 +1575,215 @@ plot_decomp=function(decomp1,decomp2,threshold,labels,
   all=colSums(rbind(decomp1,decomp2)) # Both groups, all
   
   dat=rbind(all,dat1,dat2,ref1,ref2)
+  dat=dat[,setdiff(colnames(dat),c("Died.of.unrecorded","Not.recorded","Other"))]
   tot=outer(rowSums(dat),rep(1,dim(dat)[2]))
   pdat=dat/pmax(tot,1)
   ci=2*sqrt(pdat*(1-pdat)/tot)
   ci[which(is.na(ci))]=0
-    
+  
   g2=grep("Died",colnames(dat),value=TRUE)
   g1=setdiff(colnames(dat),g2)
   
-  g2=setdiff(g2,"Died.of.unrecorded")
-  g1=setdiff(g1,c("Not.recorded","Other"))
+  # Redefine names
+  llx=c(
+    "All adm.", 
+    paste0(labels[1],"; score<",signif(threshold,digits=2)),
+    paste0(labels[2],"; score<",signif(threshold,digits=2)),
+    paste0("All adm. ",labels[1]),paste0("All adm. ",labels[2]))
   
-  w=order(-as.numeric(dat[1,g1]))
-  w2=match(paste0("Died.of.",g1[w]),g2)
+  # Partition into 'Died of' and not
+  rownames(ci)=paste0("ci_",rownames(ci))
+  pdat=rbind(pdat,ci)
+  pdat2=pdat[,grep("Died.of",colnames(pdat))]
+  pdat1=pdat[,grep("Died.of",colnames(pdat),invert=TRUE)]
   
-  oldpar = par(no.readonly = TRUE)
-  on.exit(par(oldpar)) 
-  
-  
-  lsp=0.1
-  if (inc_died) {
-    par(mfrow=c(2,1),mar=c(1,4*mar_scale,1,1))
-  } else par(mar=c(8*mar_scale,4*mar_scale,1,1))
-  
-  plot(0,type="n",xlim=c(1,length(g1)),ylim=c(0,max(pdat)),xlab="",ylab="Prop. (adm)",xaxt="n")
-  for (i in 1:dim(dat)[1]) {
-    x=1:length(g1) + i*lsp
-    y=as.numeric(pdat[i,g1[w]])
-    yci=as.numeric(ci[i,g1[w]])
-    segments(x,
-             rep(0,length(g1)),
-             x,
-             y,col=i)
-    segments(x, # Confidence intervals as thicker lines
-             y-yci,
-             x,
-             y+yci,col=i,lwd=3)
+  for (ii in 1:2) {
     
-    # Legend
-    par(ps=par()$ps/mar_scale)
-    legend("topright",c(
-      "All adm.", 
-      paste0(labels[1],"; score<",signif(threshold,digits=2)),
-      paste0(labels[2],"; score<",signif(threshold,digits=2)),
-      paste0("All adm. ",labels[1]),paste0("All adm. ",labels[2])),
-      lty=1,col=1:5,cex=mar_scale)
-    par(ps=par()$ps*mar_scale)
+    if (ii==1) pdat=pdat1 else pdat=pdat2
     
-  }
-  if (!inc_died) {
-    axis(1,at=(1:length(g1)) + dim(dat)[1]*lsp/2,labels = gsub("."," ",g1[w],fixed=TRUE),las=2,cex.axis=0.7)
-  } 
-  if (inc_died) {
-    par(mar=c(8*mar_scale,4*mar_scale,1,1))
+    # Set up data frame: survived admission
+    tpdat=data.frame(t(pdat))
+    tpdat=tpdat[order(-tpdat[,1]),]
     
-    plot(0,type="n",xlim=c(1,length(g2)),ylim=c(0,max(pdat)/10),xlab="",ylab="Prop. (died)",xaxt="n")
-    for (i in 1:dim(dat)[1]) {
-      x=1:length(g2) + i*lsp
-      y=as.numeric(pdat[i,g2[w2]])
-      yci=as.numeric(ci[i,g2[w2]])
-      segments(x,
-               rep(0,length(g2)),
-               x,
-               y,col=i)
-      segments(x, # Confidence intervals as thicker lines
-               y-yci,
-               x,
-               y+yci,col=i,lwd=3)
+    t2=data.frame()
+    for (i in 1:5) {
+      t2=rbind(t2,data.frame(Cat=rownames(tpdat),
+                             group=colnames(tpdat)[i],
+                             Prop=tpdat[,i],
+                             upper=tpdat[,i]+tpdat[,i+5],
+                             lower=tpdat[,i]-tpdat[,i+5]))
     }
-    axis(1,at=(1:length(g1)) + dim(dat)[1]*lsp/2,labels = gsub("."," ",g1[w],fixed=TRUE),las=2,cex.axis=0.7)
+    
+    if (ii==1) {
+      xl=unique(t2$Cat)
+      t2$Cat=factor(t2$Cat,levels=xl)
+    }
+    if (ii==2) t2$Cat=factor(t2$Cat,levels=paste0("Died.of.",xl))
+    
+    assign(paste0("p",ii),
+           ggplot(t2,aes(x=.data$Cat,y=.data$Prop,fill=.data$group)) + 
+             geom_bar(stat="identity", position=position_dodge()) + 
+             theme(axis.text.x = element_text(angle = 90,hjust=1)) +
+             geom_errorbar(aes(x=.data$Cat,ymin=.data$lower,ymax=.data$upper),
+                           position=position_dodge(width=0.9),width=0.4, colour="black"))
     
   }
-  # conf int
-  # Legend
   
+  # Legend for top plot only
+  p1=p1 + theme(legend.justification = c(1,0),
+                legend.position = c(1,0.3),
+                legend.spacing = unit(0, "npc"),
+                legend.margin = margin(),
+                legend.background = 
+                  element_rect(fill = "white", linewidth=0, colour = "white")) +
+    scale_fill_discrete(labels=llx,name="Amongst")
+  p2=p2 + theme(legend.position = "none")
+  
+  if (inc_died) {
+    p1 = p1 + xlab("") + theme(axis.text.x=element_blank(), 
+                               axis.ticks.x=element_blank()) + 
+      ggtitle("Admitted")
+    p2 = p2 + scale_x_discrete(labels=gsub("."," ",xl,fixed=TRUE))
+    p = p1 / p2 + plot_layout(heights = c(3,1)) +
+      ggtitle("Died") + xlab("")
+  } else {
+    p1 = p1 + scale_x_discrete(labels=gsub("."," ",xl,fixed=TRUE)) + xlab("")
+  }
+  
+  # CIs
+  # Lower plot
+  # Tidier names
+  
+  suppressWarnings(print(p))
+  invisible(p)
+  
+}
+
+
+
+
+##' for_breakdown
+##' 
+##' For a given category (e.g., 'male', 'over 65') considers 
+##'   1) all admissions for people in that category
+##'   2) all admissions for people in that category for which the 
+##'       SPARRA score was less than some threshold (e.g., false
+##'       negatives
+##' 
+##' For each of these groups, we consider the breakdown of medical
+##'  admission types. We then plot the frequency of admission types
+##'  in group 1 against the difference in frequencies between group 
+##'  1 and group 2 (group 2 minus group 1).
+##' An admission type which is relatively more common in group (1)
+##'  indicates that, in the relevant category, the admission type
+##'  tends to be associated with higher SPARRA scores (and is in a
+##'  sense easier to predict). Such admission types will correspond
+##'  to points below the line y=0.
+##'  Admission types which are relatively more common in group 2 
+##'  correspond to those which are relatively harder to predict. 
+##'  These correspond to points above the line y=0
+##' Since points are close together, only those greater than a 
+##'  certain distance from 0 are marked.
+##' 
+##' Takes as an argument a matrix in which
+##'   The matrix shows only data for the group in question
+##'  Columns are named with the admission types to be plotted. Any admission 
+##'   types including the string 'Died' are counted as deaths
+##'  If the matrix has N rows, these are interpreted as corresponding to N
+##'   score quantiles in increasing order.
+##'  The (i,j)th entry of the matrix is the number of people admitted for 
+##'   reason i with a score greater than or equal to (j-1)/N and less than (j/N) 
+##'   who are in that group
+##' 
+##' @param decomp_table matrix for group; see specification in description
+##' @param group name of group
+##' @param threshold cutoff, rounded to nearest 0.05
+##' @param inc_died set to TRUE to include a second panel showing 'death' type admissions
+##' @param ldiff specifically label points this far from xy line
+##' @param ci set to a value <1 to draw confidence intervals at that value, or FALSE to not draw confidence intervals.
+##' @param xlimit limits for x axis; default c(-0.05,0.35)
+##' @param ylimit limits for y axis; default c(-0.04,0.04)
+##' @return ggplot figure (invisible)
+##' @export
+##' @examples
+##' 
+##' # See vignette
+for_breakdown = function(decomp_table, group, threshold,
+                         inc_died=TRUE,ldiff = 0.005,ci=0.95,
+                         xlimit=c(-0.05,0.35),ylimit=c(-0.04, 0.04)) {
+  
+  # Remove 'died of' type admissions if specified
+  if (!inc_died) decomp_table=decomp_table[,-grep("Died",colnames(decomp_table))]
+  
+  # Remove junk
+  junk=c("Died.of.unrecorded","Not.recorded","Other")
+  decomp_table=decomp_table[,setdiff(colnames(decomp_table),junk)]
+  
+  nquant=dim(decomp_table)[1] # Number of score quantiles
+  tq=floor(nquant*threshold) # Largest quantile less than score threshold
+  
+  # Frequencies by admission type
+  xt = colSums(decomp_table)
+  yt = colSums(decomp_table[1:tq,])
+  
+  # Sums (nxt=total admissions, nyt=total admissions with SPARRA<0.1)
+  nxt = sum(xt)
+  nyt = sum(yt)
+  
+  # Proportions of each admission type
+  pxt = xt/max(1,nxt)
+  pyt = yt/max(1,nyt)
+  
+  # Standard errors for pxt and pyt, taking nxt and nyt as constant
+  se_pxt = sqrt(pxt * (1 - pxt)/nxt)
+  se_pyt = sqrt(pyt * (1 - pyt)/nyt)
+  
+  # Standard error for difference pyt - pxt
+  se_diff = sqrt(se_pxt^2 + se_pyt^2)
+  
+  # (asymptotic) confidence interval for difference pyt - pxt
+  if (ci) {
+    ci_level = ci
+    z_alpha = -qnorm((1 - ci_level)/2)
+    ci_diff_lower = (pyt - pxt) - z_alpha * se_diff
+    ci_diff_upper = (pyt - pxt) + z_alpha * se_diff
+  }
+  
+  # Normalise
+  xt=xt/sum(xt)
+  yt=yt/sum(yt)
+  
+  names(xt) = gsub(".", " ",names(xt),fixed=TRUE)
+  data_df = data.frame(xt, yt, ci_diff_lower, ci_diff_upper)
+  
+  # Set up plot
+  p = ggplot(data_df, aes(x = xt, y = yt - xt)) +
+    geom_hline(yintercept=0,linewidth=1/2) + 
+    geom_point(pch = 16, size = 2,col="gray") 
+    
+  
+  # Add confidence intervals
+  if (ci){
+    p = p +  geom_errorbar(
+      aes(ymin = ci_diff_lower, ymax = ci_diff_upper),
+      color = "blue",
+      linewidth = 0.5)
+  }
+  
+  ww=which(abs(data_df$xt-data_df$yt)>ldiff)
+  p=suppressWarnings( p + 
+    geom_label_repel(data=data_df[ww,], force=2,
+                     size = 2, label = rownames(data_df)[ww], #ifelse(abs(xt - yt) > ldiff, names(xt), ""), 
+                     nudge_x = 0.05, nudge_y = 0, box.padding = 0.2,label.padding=0.1) +
+    xlim(xlimit) + 
+    ylim(ylimit) +
+    labs(x = "Freq. in all adm.",
+         y = paste0("(Freq. with score < ", threshold, ") - (Freq. in all adm.)"),
+         title = paste0("Group: ", group)) +
+    theme_minimal(base_size=8) +
+    guides(color = "none"))
+  suppressWarnings(suppressWarnings(print(p)))
+  invisible(p)
 }
 
 

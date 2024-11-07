@@ -1,7 +1,7 @@
 Package: SPARRAfairness
 Title: Analysis of Differential Behaviour of SPARRA Score Across
         Demographic Groups
-Version: 0.0.0.1
+Version: 0.0.0.2
 Authors@R: 
   c(person(given = "Ioanna",
            family = "Thoma",
@@ -38,13 +38,13 @@ Description: The SPARRA risk score (Scottish Patients At Risk of admission and R
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.5.0), stats, graphics, grDevices, matrixStats,
-        mvtnorm, cvAUC, ranger
-RoxygenNote: 7.2.1
+Depends: R (>= 3.5.0), stats, graphics, grDevices, matrixStats, ranger
+Imports: mvtnorm,cvAUC,ggplot2,ggrepel,patchwork,scales
+RoxygenNote: 7.3.1
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2023-04-20 08:13:46 UTC; vwbw55
+Packaged: 2024-11-07 10:15:48 UTC; vwbw55
 Author: Ioanna Thoma [aut] (<https://orcid.org/0000-0001-6928-2198>),
   Catalina Vallejos [ctb] (<https://orcid.org/0000-0003-3638-1960>),
   Louis Aslett [ctb] (<https://orcid.org/0000-0003-2211-233X>),
@@ -52,4 +52,4 @@ Author: Ioanna Thoma [aut] (<https://orcid.org/0000-0001-6928-2198>),
   Simon Rogers [ctb] (<https://orcid.org/0000-0003-3578-4477>),
   James Liley [cre, aut] (<https://orcid.org/0000-0002-0049-8238>)
 Repository: CRAN
-Date/Publication: 2023-04-20 17:22:34 UTC
+Date/Publication: 2024-11-07 10:30:02 UTC
